@@ -34,7 +34,17 @@ function App(){
   function rodarDia(){ setDia(d=>d+1); }
   function addPessoa(){ if(!novo.nome.trim()) return; setPessoas([...pessoas,{id:Date.now(),...novo,fixo:false,falta:false}]); setNovo({nome:'',equipe:'Equipe A',senha:'1234'}); }
   function toggle(id,key){ setPessoas(pessoas.map(p=>p.id===id?{...p,[key]:!p[key]}:p)); }
-  function addBancada(){ if(!bancada.numero.trim()) return; bancada.lado==='A'?setLadoA([...ladoA,bancada.numero]):setLadoB([...ladoB,bancada.numero]); setBancada({lado:'A',numero:''}); setDash({...dash,bancadas:ladoA.length+ladoB.length+1}); }
+  function addBancada(){
+  if(!bancada.numero.trim()) return;
+
+  if(bancada.lado === 'A'){
+    setLadoA([...ladoA, bancada.numero]);
+  } else {
+    setLadoB([...ladoB, bancada.numero]);
+  }
+
+  setBancada({lado:'A', numero:''});
+}
   function alterarSenha(){ setPessoas(pessoas.map(p=>p.nome===senha.nome?{...p,senha:senha.nova||p.senha}:p)); setSenha({...senha,nova:''}); alert('Senha alterada com sucesso.'); }
 
   if(!logged) return <Login onLogin={()=>setLogged(true)}/>;
