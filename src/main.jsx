@@ -61,7 +61,27 @@ function App(){
   return <div className="app">
     <header><div><h1><PawPrint/> PETFLOW V6</h1><p><b>Lideranças:</b> Flavia Trindade / José Ivanilson<br/><b>Apoio:</b> Carlos / Francisca</p></div><button className="ghost" onClick={()=>setLogged(false)}><LogOut size={16}/> sair</button></header>
     {tab==='inicio'&&<section><Card title="Dashboard Operacional"><div className="grid"><Kpi label="Ativos" value={dash.ativos}/><Kpi label="Faltas" value={dash.faltas}/><Kpi label="Fixos" value={dash.fixos}/><Kpi label="Bancadas" value={dash.bancadas}/></div><p><b>Rodízio diário:</b> 00:00</p><p><b>Troca semanal:</b> Domingo 23:59</p><button className="primary" onClick={rodarDia}>Simular próximo dia</button></Card><Card title="Meta Geral do Dia"><b>Meta:</b> {meta.meta} pedidos<br/><b>Realizado:</b> {meta.realizado}<br/><b>Faltam:</b> {faltam}<div className="progress"><span style={{width:progresso+'%'}}>{progresso}%</span></div></Card></section>}
-    {tab==='escala'&&<Card title={`Escala do Dia • Dia ${dia}`}><table><thead><tr><th>Lado A</th><th>Lado B</th></tr></thead><tbody>{Array.from({length:22}).map((_,i)=><tr key={i}><td>{ladoA[i]} — {equipeA[i]?.falta?'VAZIO':equipeA[i]?.nome||'VAZIO'}</td><td>{ladoB[i]} — {equipeB[i]?.falta?'VAZIO':equipeB[i]?.nome||'VAZIO'}</td></tr>)}</tbody></table></Card>}
+    {tab==='escala'&&
+<Card title={`Escala do Dia • Dia ${dia}`}>
+
+  <h3>Lado A</h3>
+
+  {ladoA.map((b,i)=>(
+    <p key={i}>
+      {i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}
+    </p>
+  ))}
+
+  <h3>Lado B</h3>
+
+  {ladoB.map((b,i)=>(
+    <p key={i}>
+      {i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}
+    </p>
+  ))}
+
+</Card>
+}
     {tab==='dados'&&<Card title="Dados / Meta Operacional"><label>Meta geral</label><input value={meta.meta} onChange={e=>setMeta({...meta,meta:+e.target.value})}/><label>Realizado</label><input value={meta.realizado} onChange={e=>setMeta({...meta,realizado:+e.target.value})}/><div className="notice">Liderança e apoio podem preencher esses dados durante o dia.</div></Card>}
     {tab==='equipe'&&<Card title="Cadastro de Colaboradores"><input placeholder="Nome" value={novo.nome} onChange={e=>setNovo({...novo,nome:e.target.value})}/><select value={novo.equipe} onChange={e=>setNovo({...novo,equipe:e.target.value})}><option>Equipe A</option><option>Equipe B</option></select><input placeholder="Senha inicial" value={novo.senha} onChange={e=>setNovo({...novo,senha:e.target.value})}/><button className="primary" onClick={addPessoa}>Adicionar</button><table><tbody>{pessoas.map(p=><tr key={p.id}><td><b>{p.nome}</b><br/><small>{p.equipe} {p.fixo?'• FIXO':''}</small></td><td><button onClick={()=>toggle(p.id,'falta')}>Falta</button></td><td><button onClick={()=>toggle(p.id,'fixo')}>Fixo</button></td></tr>)}</tbody></table></Card>}
     {tab==='bancadas'&&<section><Card title="Gestão de Bancadas"><input placeholder="Número da bancada" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/><input
