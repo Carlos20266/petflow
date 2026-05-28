@@ -127,3 +127,7 @@ const usuarios = [
     cargo:'colaborador'
   }
 ]
+
+if(user.cargo === 'apoio' || user.cargo === 'lideranca'){
+  // acesso total
+}
