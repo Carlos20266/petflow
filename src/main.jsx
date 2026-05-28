@@ -24,7 +24,11 @@ function App(){
   const [dash,setDash]=useState({ativos:21,faltas:2,fixos:3,bancadas:44});
   const [novo,setNovo]=useState({nome:'', equipe:'Equipe A', senha:'1234'});
   const [senha,setSenha]=useState({nome:'Bruna', nova:''});
-  const [bancada,setBancada]=useState({lado:'A', numero:''});
+  const [bancada,setBancada]=useState({
+  lado:'A',
+  numero:'',
+  colaborador:''
+});
 
   const equipeA = pessoas.filter(p=>p.equipe==='Equipe A');
   const equipeB = pessoas.filter(p=>p.equipe==='Equipe B');
@@ -38,9 +42,15 @@ function App(){
   if(!bancada.numero.trim()) return;
 
   if(bancada.lado === 'A'){
-    setLadoA([...ladoA, bancada.numero]);
+    setLadoA([...ladoA,{
+  numero:bancada.numero,
+  colaborador:bancada.colaborador
+}]);
   } else {
-    setLadoB([...ladoB, bancada.numero]);
+    setLadoB([...ladoB,{
+  numero:bancada.numero,
+  colaborador:bancada.colaborador
+}]);
   }
 
   setBancada({lado:'A', numero:''});
@@ -54,9 +64,14 @@ function App(){
     {tab==='escala'&&<Card title={`Escala do Dia • Dia ${dia}`}><table><thead><tr><th>Lado A</th><th>Lado B</th></tr></thead><tbody>{Array.from({length:22}).map((_,i)=><tr key={i}><td>{ladoA[i]} — {equipeA[i]?.falta?'VAZIO':equipeA[i]?.nome||'VAZIO'}</td><td>{ladoB[i]} — {equipeB[i]?.falta?'VAZIO':equipeB[i]?.nome||'VAZIO'}</td></tr>)}</tbody></table></Card>}
     {tab==='dados'&&<Card title="Dados / Meta Operacional"><label>Meta geral</label><input value={meta.meta} onChange={e=>setMeta({...meta,meta:+e.target.value})}/><label>Realizado</label><input value={meta.realizado} onChange={e=>setMeta({...meta,realizado:+e.target.value})}/><div className="notice">Liderança e apoio podem preencher esses dados durante o dia.</div></Card>}
     {tab==='equipe'&&<Card title="Cadastro de Colaboradores"><input placeholder="Nome" value={novo.nome} onChange={e=>setNovo({...novo,nome:e.target.value})}/><select value={novo.equipe} onChange={e=>setNovo({...novo,equipe:e.target.value})}><option>Equipe A</option><option>Equipe B</option></select><input placeholder="Senha inicial" value={novo.senha} onChange={e=>setNovo({...novo,senha:e.target.value})}/><button className="primary" onClick={addPessoa}>Adicionar</button><table><tbody>{pessoas.map(p=><tr key={p.id}><td><b>{p.nome}</b><br/><small>{p.equipe} {p.fixo?'• FIXO':''}</small></td><td><button onClick={()=>toggle(p.id,'falta')}>Falta</button></td><td><button onClick={()=>toggle(p.id,'fixo')}>Fixo</button></td></tr>)}</tbody></table></Card>}
-    {tab==='bancadas'&&<section><Card title="Gestão de Bancadas"><input placeholder="Número da bancada" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/><select value={bancada.lado} onChange={e=>setBancada({...bancada,lado:e.target.value})}><option>A</option><option>B</option></select><button className="primary" onClick={addBancada}>Inserir bancada</button></Card><Card title="Lado A">{ladoA.map((b,i)=>
+    {tab==='bancadas'&&<section><Card title="Gestão de Bancadas"><input placeholder="Número da bancada" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/><input
+placeholder="Colaborador"
+value={bancada.colaborador}
+onChange={e=>setBancada({...bancada,colaborador:e.target.value})}
+/>
+      <select value={bancada.lado} onChange={e=>setBancada({...bancada,lado:e.target.value})}><option>A</option><option>B</option></select><button className="primary" onClick={addBancada}>Inserir bancada</button></Card><Card title="Lado A">{ladoA.map((b,i)=>
   <p key={b}>
-    {i+1}º — {b}
+    {i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}
     <button
       onClick={() => setLadoA(ladoA.filter(x => x !== b))}
       style={{
@@ -73,7 +88,7 @@ function App(){
   </p>
 )}</Card><Card title="Lado B">{ladoB.map((b,i)=>
   <p key={b}>
-    {i+1}º — {b}
+    {i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}
     <button
       onClick={() => setLadoB(ladoB.filter(x => x !== b))}
       style={{
