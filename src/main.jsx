@@ -110,3 +110,20 @@ function Login({onLogin}){
 function Kpi({label,value}){return <div className="kpi"><span>{label}</span><b>{value}</b></div>}
 
 createRoot(document.getElementById('root')).render(<App/>);
+const usuarios = [
+  {
+    usuario:'flavia trindade',
+    senha:'1',
+    cargo:'lideranca'
+  },
+  {
+    usuario:'carlos eduardo',
+    senha:'2',
+    cargo:'apoio'
+  },
+  {
+    usuario:'bruna',
+    senha:'1234',
+    cargo:'colaborador'
+  }
+]
