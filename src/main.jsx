@@ -83,7 +83,7 @@ function App(){
     <nav>{[['inicio',LayoutDashboard],['escala',ClipboardList],['dados',Target],['equipe',Users],['bancadas',PawPrint],['config',Settings]].map(([id,Icon])=><button className={tab===id?'on':''} onClick={()=>setTab(id)} key={id}><Icon size={16}/><span>{id}</span></button>)}</nav>
   </div>;
 }
-function Login({onLogin}){return <div className="login"><div className="loginCard"><h1>🐾 PETFLOW</h1><p>Sistema online interno</p><input placeholder="Usuário" defaultValue="flavia.trindade"/><input placeholder="Senha" type="password" defaultValue="1234"/><button className="primary" onClick={onLogin}>Entrar</button><small>Demo: qualquer entrada libera o acesso.</small></div></div>}
+function Login({onLogin}){return <div className="login"><div className="loginCard"><h1>🐾 PETFLOW</h1><p>Sistema online interno</p><input placeholder="Usuário" defaultValue="flavia.trindade"/><input placeholder="Senha" type="password" defaultValue="1234"/><button className="primary" onClick={onLogin}>Entrar</button><small>
 function Card({title,children}){return <div className="card"><h3>{title}</h3>{children}</div>}
 function Kpi({label,value}){return <div className="kpi"><span>{label}</span><b>{value}</b></div>}
 
