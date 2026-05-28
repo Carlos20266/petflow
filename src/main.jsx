@@ -144,7 +144,7 @@ function Login({onLogin}){
       </div>
     </div>
   )
-}}
+}
   function Card({title,children}){return <div className="card"><h3>{title}</h3>{children}</div>}
 function Kpi({label,value}){return <div className="kpi"><span>{label}</span><b>{value}</b></div>}
 
