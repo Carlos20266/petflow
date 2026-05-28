@@ -44,7 +44,41 @@ function App(){
     {tab==='escala'&&<Card title={`Escala do Dia • Dia ${dia}`}><table><thead><tr><th>Lado A</th><th>Lado B</th></tr></thead><tbody>{Array.from({length:22}).map((_,i)=><tr key={i}><td>{ladoA[i]} — {equipeA[i]?.falta?'VAZIO':equipeA[i]?.nome||'VAZIO'}</td><td>{ladoB[i]} — {equipeB[i]?.falta?'VAZIO':equipeB[i]?.nome||'VAZIO'}</td></tr>)}</tbody></table></Card>}
     {tab==='dados'&&<Card title="Dados / Meta Operacional"><label>Meta geral</label><input value={meta.meta} onChange={e=>setMeta({...meta,meta:+e.target.value})}/><label>Realizado</label><input value={meta.realizado} onChange={e=>setMeta({...meta,realizado:+e.target.value})}/><div className="notice">Liderança e apoio podem preencher esses dados durante o dia.</div></Card>}
     {tab==='equipe'&&<Card title="Cadastro de Colaboradores"><input placeholder="Nome" value={novo.nome} onChange={e=>setNovo({...novo,nome:e.target.value})}/><select value={novo.equipe} onChange={e=>setNovo({...novo,equipe:e.target.value})}><option>Equipe A</option><option>Equipe B</option></select><input placeholder="Senha inicial" value={novo.senha} onChange={e=>setNovo({...novo,senha:e.target.value})}/><button className="primary" onClick={addPessoa}>Adicionar</button><table><tbody>{pessoas.map(p=><tr key={p.id}><td><b>{p.nome}</b><br/><small>{p.equipe} {p.fixo?'• FIXO':''}</small></td><td><button onClick={()=>toggle(p.id,'falta')}>Falta</button></td><td><button onClick={()=>toggle(p.id,'fixo')}>Fixo</button></td></tr>)}</tbody></table></Card>}
-    {tab==='bancadas'&&<section><Card title="Gestão de Bancadas"><input placeholder="Número da bancada" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/><select value={bancada.lado} onChange={e=>setBancada({...bancada,lado:e.target.value})}><option>A</option><option>B</option></select><button className="primary" onClick={addBancada}>Inserir bancada</button></Card><Card title="Lado A">{ladoA.map((b,i)=><p key={b}>{i+1}º — {b}</p>)}</Card><Card title="Lado B">{ladoB.map((b,i)=><p key={b}>{i+1}º — {b}</p>)}</Card></section>}
+    {tab==='bancadas'&&<section><Card title="Gestão de Bancadas"><input placeholder="Número da bancada" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/><select value={bancada.lado} onChange={e=>setBancada({...bancada,lado:e.target.value})}><option>A</option><option>B</option></select><button className="primary" onClick={addBancada}>Inserir bancada</button></Card><Card title="Lado A">{ladoA.map((b,i)=>
+  <p key={b}>
+    {i+1}º — {b}
+    <button
+      onClick={() => setLadoA(ladoA.filter(x => x !== b))}
+      style={{
+        marginLeft:'10px',
+        background:'red',
+        color:'#fff',
+        border:'none',
+        borderRadius:'5px',
+        cursor:'pointer'
+      }}
+    >
+      X
+    </button>
+  </p>
+)}</Card><Card title="Lado B">{ladoB.map((b,i)=>
+  <p key={b}>
+    {i+1}º — {b}
+    <button
+      onClick={() => setLadoB(ladoB.filter(x => x !== b))}
+      style={{
+        marginLeft:'10px',
+        background:'red',
+        color:'#fff',
+        border:'none',
+        borderRadius:'5px',
+        cursor:'pointer'
+      }}
+    >
+      X
+    </button>
+  </p>
+)}</Card></section>}
     {tab==='config'&&<Card title="Configurações"><h4>Alterar visão do Dashboard</h4>{Object.keys(dash).map(k=><label key={k}>{k}<input value={dash[k]} onChange={e=>setDash({...dash,[k]:+e.target.value})}/></label>)}<h4>Alterar senha de colaborador</h4><select value={senha.nome} onChange={e=>setSenha({...senha,nome:e.target.value})}>{pessoas.map(p=><option key={p.id}>{p.nome}</option>)}</select><input placeholder="Nova senha" value={senha.nova} onChange={e=>setSenha({...senha,nova:e.target.value})}/><button className="primary" onClick={alterarSenha}>Alterar senha</button></Card>}
     <nav>{[['inicio',LayoutDashboard],['escala',ClipboardList],['dados',Target],['equipe',Users],['bancadas',PawPrint],['config',Settings]].map(([id,Icon])=><button className={tab===id?'on':''} onClick={()=>setTab(id)} key={id}><Icon size={16}/><span>{id}</span></button>)}</nav>
   </div>;
