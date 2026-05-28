@@ -94,18 +94,57 @@ function App(){
   </div>;
 }
 function Login({onLogin}){
+  const usuarios = [
+    {usuario:'flavia trindade', senha:'1', cargo:'lideranca'},
+    {usuario:'jose ivanilson', senha:'2', cargo:'lideranca'},
+    {usuario:'carlos eduardo', senha:'3', cargo:'apoio'},
+    {usuario:'francisca', senha:'4', cargo:'apoio'},
+    {usuario:'bruna', senha:'1234', cargo:'colaborador'},
+  ];
+
+  const [login,setLogin] = React.useState('flavia.trindade');
+  const [senha,setSenha] = React.useState('');
+
+  function entrar(){
+    const user = usuarios.find(
+      u => u.usuario === login && u.senha === senha
+    );
+
+    if(!user){
+      alert('Usuário ou senha incorretos');
+      return;
+    }
+
+    onLogin(user);
+  }
+
   return (
     <div className="login">
       <div className="loginCard">
         <h1>🐾 PETFLOW</h1>
         <p>Sistema online interno</p>
-        <input placeholder="Usuário" defaultValue="flavia.trindade" />
-        <input placeholder="Senha" type="password" defaultValue="1234" />
-        <button className="primary" onClick={onLogin}>Entrar</button>
+
+        <input
+          placeholder="Usuário"
+          value={login}
+          onChange={e=>setLogin(e.target.value)}
+        />
+
+        <input
+          placeholder="Senha"
+          type="password"
+          value={senha}
+          onChange={e=>setSenha(e.target.value)}
+        />
+
+        <button className="primary" onClick={entrar}>
+          Entrar
+        </button>
+
       </div>
     </div>
   )
-}
+}}
   function Card({title,children}){return <div className="card"><h3>{title}</h3>{children}</div>}
 function Kpi({label,value}){return <div className="kpi"><span>{label}</span><b>{value}</b></div>}
 
