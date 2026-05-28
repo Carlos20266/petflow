@@ -102,7 +102,7 @@ function Login({onLogin}){
     {usuario:'bruna', senha:'1234', cargo:'colaborador'},
   ];
 
-  const [login,setLogin] = React.useState('flavia.trindade');
+  const [login,setLogin] = React.useState('');
   const [senha,setSenha] = React.useState('');
 
   function entrar(){
