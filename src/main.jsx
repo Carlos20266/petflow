@@ -11,7 +11,8 @@ const categorias = [
   'Celular',
   'Lazer',
   'Saúde',
-  'Outros'
+  'Outros',
+  'fatura'
 ]
 
 function salvar(chave, valor){
