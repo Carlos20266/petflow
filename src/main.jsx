@@ -1,21 +1,17 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './style.css'
 
-const usuariosBase = [
-  {usuario:'flavia.trindade', senha:'1', cargo:'lideranca'},
-  {usuario:'jose.ivanilson', senha:'2', cargo:'lideranca'},
-  {usuario:'carlos.eduardo', senha:'3', cargo:'apoio'},
-  {usuario:'francisca', senha:'4', cargo:'apoio'},
-  {usuario:'bruna', senha:'1234', cargo:'colaborador'},
-]
-
-const pessoasBase = [
-  {id:1,nome:'Bruna',equipe:'Equipe A',senha:'1234',fixo:false,falta:false,cargo:'colaborador'},
-  {id:2,nome:'Dayane',equipe:'Equipe B',senha:'1234',fixo:false,falta:false,cargo:'colaborador'},
-  {id:3,nome:'Poliana',equipe:'Equipe A',senha:'1234',fixo:true,falta:false,cargo:'colaborador'},
-  {id:4,nome:'Lidiane',equipe:'Equipe B',senha:'1234',fixo:false,falta:false,cargo:'colaborador'},
-  {id:5,nome:'Janiele',equipe:'Equipe A',senha:'1234',fixo:false,falta:false,cargo:'colaborador'},
+const categorias = [
+  'Alimentação',
+  'Mercado',
+  'Transporte',
+  'Faculdade',
+  'Internet',
+  'Celular',
+  'Lazer',
+  'Saúde',
+  'Outros'
 ]
 
 function salvar(chave, valor){
@@ -27,261 +23,231 @@ function carregar(chave, padrao){
   return item ? JSON.parse(item) : padrao
 }
 
+function dinheiro(valor){
+  return Number(valor || 0).toLocaleString('pt-BR', {
+    style:'currency',
+    currency:'BRL'
+  })
+}
+
 function App(){
-  const [usuarioLogado,setUsuarioLogado]=useState(null)
-  const [tab,setTab]=useState('inicio')
-  const [dia,setDia]=useState(carregar('petflow_dia',1))
-  const [notificacao,setNotificacao]=useState('')
-  const [dark,setDark]=useState(carregar('petflow_dark',false))
+  const [logado,setLogado] = useState(false)
+  const [tab,setTab] = useState('inicio')
+  const [dark,setDark] = useState(carregar('eb_dark',false))
+  const [toast,setToast] = useState('')
 
-  const [pessoas,setPessoas]=useState(carregar('petflow_pessoas',pessoasBase))
-  const [ladoA,setLadoA]=useState(carregar('petflow_ladoA',[]))
-  const [ladoB,setLadoB]=useState(carregar('petflow_ladoB',[]))
-  const [meta,setMeta]=useState(carregar('petflow_meta',{meta:5000,realizado:3200}))
-  const [dash,setDash]=useState(carregar('petflow_dash',{ativos:21,faltas:2,fixos:3,bancadas:44}))
+  const [entradas,setEntradas] = useState(carregar('eb_entradas',[]))
+  const [gastos,setGastos] = useState(carregar('eb_gastos',[]))
+  const [metas,setMetas] = useState(carregar('eb_metas',[]))
 
-  const [novo,setNovo]=useState({nome:'',equipe:'Equipe A',senha:'1234',cargo:'colaborador'})
-  const [bancada,setBancada]=useState({lado:'A',numero:'',colaborador:''})
-  const [senha,setSenha]=useState({nome:'Bruna',nova:''})
+  const [entrada,setEntrada] = useState({descricao:'Salário',valor:'',categoria:'Salário'})
+  const [gasto,setGasto] = useState({descricao:'',valor:'',categoria:'Alimentação'})
+  const [meta,setMeta] = useState({nome:'',objetivo:'',atual:''})
 
-  const podeEditar = usuarioLogado?.cargo === 'lideranca' || usuarioLogado?.cargo === 'apoio'
-
-  useEffect(()=>salvar('petflow_dia',dia),[dia])
-  useEffect(()=>salvar('petflow_pessoas',pessoas),[pessoas])
-  useEffect(()=>salvar('petflow_ladoA',ladoA),[ladoA])
-  useEffect(()=>salvar('petflow_ladoB',ladoB),[ladoB])
-  useEffect(()=>salvar('petflow_meta',meta),[meta])
-  useEffect(()=>salvar('petflow_dash',dash),[dash])
-  useEffect(()=>salvar('petflow_dark',dark),[dark])
+  useEffect(()=>salvar('eb_dark',dark),[dark])
+  useEffect(()=>salvar('eb_entradas',entradas),[entradas])
+  useEffect(()=>salvar('eb_gastos',gastos),[gastos])
+  useEffect(()=>salvar('eb_metas',metas),[metas])
 
   function aviso(msg){
-    setNotificacao(msg)
-    setTimeout(()=>setNotificacao(''),3000)
+    setToast(msg)
+    setTimeout(()=>setToast(''),3000)
   }
 
-  function addPessoa(){
-    if(!novo.nome.trim()) return aviso('Digite o nome do colaborador')
-    setPessoas([...pessoas,{id:Date.now(),...novo,fixo:false,falta:false}])
-    setNovo({nome:'',equipe:'Equipe A',senha:'1234',cargo:'colaborador'})
-    aviso('Colaborador adicionado com sucesso')
+  const totalEntradas = entradas.reduce((s,e)=>s + Number(e.valor || 0),0)
+  const totalGastos = gastos.reduce((s,g)=>s + Number(g.valor || 0),0)
+  const saldo = totalEntradas - totalGastos
+  const economia = Math.max(saldo,0)
+
+  function addEntrada(){
+    if(!entrada.valor) return aviso('Digite o valor da entrada')
+    setEntradas([...entradas,{id:Date.now(),...entrada,valor:Number(entrada.valor),data:new Date().toLocaleDateString('pt-BR')}])
+    setEntrada({descricao:'',valor:'',categoria:'Salário'})
+    aviso('Entrada adicionada com sucesso')
   }
 
-  function removerPessoa(id){
-    setPessoas(pessoas.filter(p=>p.id!==id))
-    aviso('Colaborador removido')
+  function addGasto(){
+    if(!gasto.descricao || !gasto.valor) return aviso('Preencha descrição e valor')
+    setGastos([...gastos,{id:Date.now(),...gasto,valor:Number(gasto.valor),data:new Date().toLocaleDateString('pt-BR')}])
+    setGasto({descricao:'',valor:'',categoria:'Alimentação'})
+    aviso('Gasto adicionado com sucesso')
   }
 
-  function toggle(id,key){
-    setPessoas(pessoas.map(p=>p.id===id?{...p,[key]:!p[key]}:p))
-    aviso('Status atualizado')
+  function addMeta(){
+    if(!meta.nome || !meta.objetivo) return aviso('Preencha o nome e valor da meta')
+    setMetas([...metas,{id:Date.now(),...meta,objetivo:Number(meta.objetivo),atual:Number(meta.atual || 0)}])
+    setMeta({nome:'',objetivo:'',atual:''})
+    aviso('Meta criada com sucesso')
   }
 
-  function addBancada(){
-    if(!bancada.numero.trim()) return aviso('Digite a série da bancada')
-
-    const item = {
-      numero:bancada.numero,
-      colaborador:bancada.colaborador || 'VAZIO'
-    }
-
-    if(bancada.lado === 'A'){
-      setLadoA([...ladoA,item])
-    } else {
-      setLadoB([...ladoB,item])
-    }
-
-    setBancada({lado:'A',numero:'',colaborador:''})
-    aviso('Série adicionada e salva na escala')
+  function removerEntrada(id){
+    setEntradas(entradas.filter(e=>e.id!==id))
+    aviso('Entrada removida')
   }
 
-  function removerBancada(lado,index){
-    if(lado === 'A'){
-      setLadoA(ladoA.filter((_,i)=>i!==index))
-    } else {
-      setLadoB(ladoB.filter((_,i)=>i!==index))
-    }
-    aviso('Série removida da escala')
+  function removerGasto(id){
+    setGastos(gastos.filter(g=>g.id!==id))
+    aviso('Gasto removido')
   }
 
-  function rodarDia(){
-    setDia(dia+1)
-    aviso('Rodízio do próximo dia simulado com sucesso')
+  function removerMeta(id){
+    setMetas(metas.filter(m=>m.id!==id))
+    aviso('Meta removida')
   }
 
-  function alterarSenha(){
-    if(!senha.nova.trim()) return aviso('Digite a nova senha')
-    setPessoas(pessoas.map(p=>p.nome===senha.nome?{...p,senha:senha.nova}:p))
-    setSenha({...senha,nova:''})
-    aviso('Senha alterada com sucesso')
+  function atualizarMeta(id,valor){
+    setMetas(metas.map(m=>m.id===id?{...m,atual:Number(valor)}:m))
+    aviso('Meta atualizada')
   }
 
-  function sair(){
-    setUsuarioLogado(null)
-    setTab('inicio')
-  }
-
-  if(!usuarioLogado) return <Login onLogin={setUsuarioLogado}/>
+  if(!logado) return <Login onLogin={()=>setLogado(true)}/>
 
   return (
     <div className={dark?'app dark':'app'}>
-      {notificacao && <div className="toast">🐾 {notificacao}</div>}
+      {toast && <div className="toast">💰 {toast}</div>}
 
       <header>
         <div>
-          <h1>🐾 PETFLOW V6</h1>
-          <p><b>Lideranças:</b> Flavia Trindade / José Ivanilson<br/><b>Apoio:</b> Carlos / Francisca</p>
+          <h1>💰 ECONOMIA BAIXA</h1>
+          <p>Controle financeiro pessoal</p>
         </div>
-        <button onClick={sair}>Sair</button>
+        <button onClick={()=>setLogado(false)}>Sair</button>
       </header>
 
       {tab==='inicio'&&
         <>
-          <Card title="Dashboard Operacional">
+          <Card title="Dashboard Financeiro">
             <div className="grid">
-              <Kpi label="Ativos" value={dash.ativos}/>
-              <Kpi label="Faltas" value={dash.faltas}/>
-              <Kpi label="Fixos" value={dash.fixos}/>
-              <Kpi label="Bancadas" value={dash.bancadas}/>
+              <Kpi label="Saldo Atual" value={dinheiro(saldo)}/>
+              <Kpi label="Entradas" value={dinheiro(totalEntradas)}/>
+              <Kpi label="Gastos" value={dinheiro(totalGastos)}/>
+              <Kpi label="Economizado" value={dinheiro(economia)}/>
             </div>
-            <p><b>Rodízio diário:</b> 00:00</p>
-            <p><b>Troca semanal:</b> Domingo 23:59</p>
           </Card>
 
-          <Card title="Meta Geral do Dia">
-            <p><b>Meta:</b> {meta.meta} pedidos</p>
-            <p><b>Realizado:</b> {meta.realizado}</p>
-            <p><b>Faltam:</b> {Math.max(meta.meta-meta.realizado,0)}</p>
-            <div className="bar"><span style={{width:`${Math.min(100,Math.round(meta.realizado/meta.meta*100))}%`}}>{Math.min(100,Math.round(meta.realizado/meta.meta*100))}%</span></div>
+          <Card title="Resumo do Mês">
+            <p><b>Você recebeu:</b> {dinheiro(totalEntradas)}</p>
+            <p><b>Você gastou:</b> {dinheiro(totalGastos)}</p>
+            <p><b>Sobra atual:</b> {dinheiro(saldo)}</p>
           </Card>
         </>
       }
 
-      {tab==='escala'&&
-        <Card title={`Escala do Dia • Dia ${dia}`}>
-          <button className="primary" onClick={rodarDia}>Simular próximo dia</button>
+      {tab==='entradas'&&
+        <Card title="Adicionar Entrada">
+          <input placeholder="Descrição" value={entrada.descricao} onChange={e=>setEntrada({...entrada,descricao:e.target.value})}/>
+          <input placeholder="Valor" type="number" value={entrada.valor} onChange={e=>setEntrada({...entrada,valor:e.target.value})}/>
+          <select value={entrada.categoria} onChange={e=>setEntrada({...entrada,categoria:e.target.value})}>
+            <option>Salário</option>
+            <option>Horas extras</option>
+            <option>Bônus</option>
+            <option>Freelance</option>
+            <option>Outros ganhos</option>
+          </select>
+          <button className="primary" onClick={addEntrada}>Adicionar entrada</button>
 
-          <h3>Lado A</h3>
-          {ladoA.length===0 && <p>Nenhuma série cadastrada.</p>}
-          {ladoA.map((b,i)=>(
-            <p key={i}>{i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}</p>
-          ))}
-
-          <h3>Lado B</h3>
-          {ladoB.length===0 && <p>Nenhuma série cadastrada.</p>}
-          {ladoB.map((b,i)=>(
-            <p key={i}>{i+1}º — {b.numero} — {b.colaborador || 'VAZIO'}</p>
-          ))}
-        </Card>
-      }
-
-      {tab==='dados'&&
-        <Card title="Dados / Meta Operacional">
-          <label>Meta geral</label>
-          <input value={meta.meta} onChange={e=>setMeta({...meta,meta:+e.target.value})}/>
-          <label>Realizado</label>
-          <input value={meta.realizado} onChange={e=>setMeta({...meta,realizado:+e.target.value})}/>
-          <button className="primary" onClick={()=>aviso('Meta atualizada com sucesso')}>Salvar dados</button>
-        </Card>
-      }
-
-      {tab==='equipe'&&
-        <Card title="Cadastro de Colaboradores">
-          {podeEditar&&<>
-            <input placeholder="Nome" value={novo.nome} onChange={e=>setNovo({...novo,nome:e.target.value})}/>
-            <select value={novo.equipe} onChange={e=>setNovo({...novo,equipe:e.target.value})}>
-              <option>Equipe A</option>
-              <option>Equipe B</option>
-            </select>
-            <input placeholder="Senha" value={novo.senha} onChange={e=>setNovo({...novo,senha:e.target.value})}/>
-            <select value={novo.cargo} onChange={e=>setNovo({...novo,cargo:e.target.value})}>
-              <option value="colaborador">Colaborador</option>
-              <option value="apoio">Apoio</option>
-              <option value="lideranca">Liderança</option>
-            </select>
-            <button className="primary" onClick={addPessoa}>Adicionar</button>
-          </>}
-
-          {pessoas.map(p=>(
-            <div className="linha" key={p.id}>
+          <h3>Histórico</h3>
+          {entradas.map(e=>(
+            <div className="linha" key={e.id}>
               <div>
-                <b>{p.nome}</b><br/>
-                {p.equipe} • {p.cargo} {p.fixo?'• FIXO':''} {p.falta?'• FALTA':''}
+                <b>{e.descricao}</b><br/>
+                {e.categoria} • {e.data}<br/>
+                {dinheiro(e.valor)}
               </div>
-              {podeEditar&&<div>
-                <button onClick={()=>toggle(p.id,'falta')}>Falta</button>
-                <button onClick={()=>toggle(p.id,'fixo')}>Fixo</button>
-                <button className="danger" onClick={()=>removerPessoa(p.id)}>Remover</button>
-              </div>}
+              <button className="danger" onClick={()=>removerEntrada(e.id)}>Remover</button>
             </div>
           ))}
         </Card>
       }
 
-      {tab==='bancadas'&&
-        <>
-          {podeEditar&&
-          <Card title="Gestão de Séries">
-            <input placeholder="Série" value={bancada.numero} onChange={e=>setBancada({...bancada,numero:e.target.value})}/>
-            <input placeholder="Colaborador" value={bancada.colaborador} onChange={e=>setBancada({...bancada,colaborador:e.target.value})}/>
-            <select value={bancada.lado} onChange={e=>setBancada({...bancada,lado:e.target.value})}>
-              <option>A</option>
-              <option>B</option>
-            </select>
-            <button className="primary" onClick={addBancada}>Inserir série</button>
-          </Card>}
+      {tab==='gastos'&&
+        <Card title="Adicionar Gasto">
+          <input placeholder="Descrição" value={gasto.descricao} onChange={e=>setGasto({...gasto,descricao:e.target.value})}/>
+          <input placeholder="Valor" type="number" value={gasto.valor} onChange={e=>setGasto({...gasto,valor:e.target.value})}/>
+          <select value={gasto.categoria} onChange={e=>setGasto({...gasto,categoria:e.target.value})}>
+            {categorias.map(c=><option key={c}>{c}</option>)}
+          </select>
+          <button className="primary" onClick={addGasto}>Adicionar gasto</button>
 
-          <Card title="Lado A">
-            {ladoA.map((b,i)=>(
-              <p key={i}>{i+1}º — {b.numero} — {b.colaborador || 'VAZIO'} {podeEditar&&<button className="danger" onClick={()=>removerBancada('A',i)}>X</button>}</p>
-            ))}
-          </Card>
+          <h3>Histórico</h3>
+          {gastos.map(g=>(
+            <div className="linha" key={g.id}>
+              <div>
+                <b>{g.descricao}</b><br/>
+                {g.categoria} • {g.data}<br/>
+                {dinheiro(g.valor)}
+              </div>
+              <button className="danger" onClick={()=>removerGasto(g.id)}>Remover</button>
+            </div>
+          ))}
+        </Card>
+      }
 
-          <Card title="Lado B">
-            {ladoB.map((b,i)=>(
-              <p key={i}>{i+1}º — {b.numero} — {b.colaborador || 'VAZIO'} {podeEditar&&<button className="danger" onClick={()=>removerBancada('B',i)}>X</button>}</p>
-            ))}
-          </Card>
-        </>
+      {tab==='metas'&&
+        <Card title="Minhas Metas">
+          <input placeholder="Nome da meta" value={meta.nome} onChange={e=>setMeta({...meta,nome:e.target.value})}/>
+          <input placeholder="Valor objetivo" type="number" value={meta.objetivo} onChange={e=>setMeta({...meta,objetivo:e.target.value})}/>
+          <input placeholder="Valor já guardado" type="number" value={meta.atual} onChange={e=>setMeta({...meta,atual:e.target.value})}/>
+          <button className="primary" onClick={addMeta}>Criar meta</button>
+
+          {metas.map(m=>{
+            const perc = Math.min(100,Math.round((m.atual/m.objetivo)*100))
+            return (
+              <div className="meta" key={m.id}>
+                <b>{m.nome}</b>
+                <p>{dinheiro(m.atual)} de {dinheiro(m.objetivo)}</p>
+                <div className="bar"><span style={{width:`${perc}%`}}>{perc}%</span></div>
+                <input type="number" placeholder="Atualizar valor guardado" onChange={e=>atualizarMeta(m.id,e.target.value)}/>
+                <button className="danger" onClick={()=>removerMeta(m.id)}>Remover meta</button>
+              </div>
+            )
+          })}
+        </Card>
+      }
+
+      {tab==='relatorios'&&
+        <Card title="Relatórios">
+          <h3>Gastos por Categoria</h3>
+          {categorias.map(cat=>{
+            const total = gastos.filter(g=>g.categoria===cat).reduce((s,g)=>s+Number(g.valor),0)
+            if(total===0) return null
+            return <p key={cat}><b>{cat}:</b> {dinheiro(total)}</p>
+          })}
+
+          <h3>Resumo Geral</h3>
+          <p><b>Total de entradas:</b> {dinheiro(totalEntradas)}</p>
+          <p><b>Total de gastos:</b> {dinheiro(totalGastos)}</p>
+          <p><b>Saldo:</b> {dinheiro(saldo)}</p>
+        </Card>
       }
 
       {tab==='config'&&
         <Card title="Configurações">
-          {!podeEditar&&<p>Acesso restrito para liderança e apoio.</p>}
+          <button className="primary" onClick={()=>setDark(!dark)}>
+            {dark?'Desativar modo noturno':'Ativar modo noturno'}
+          </button>
 
-          {podeEditar&&<>
-            <h3>Alterar visão do Dashboard</h3>
-            {Object.keys(dash).map(k=>(
-              <label key={k}>{k}
-                <input value={dash[k]} onChange={e=>setDash({...dash,[k]:+e.target.value})}/>
-              </label>
-            ))}
-
-            <h3>Alterar senha de colaborador</h3>
-            <select value={senha.nome} onChange={e=>setSenha({...senha,nome:e.target.value})}>
-              {pessoas.map(p=><option key={p.id}>{p.nome}</option>)}
-            </select>
-            <input placeholder="Nova senha" value={senha.nova} onChange={e=>setSenha({...senha,nova:e.target.value})}/>
-            <button className="primary" onClick={alterarSenha}>Alterar senha</button>
-
-            <h3>Acessos cadastrados</h3>
-            {pessoas.map(p=><p key={p.id}><b>{p.nome}</b> — {p.cargo} — senha: {p.senha}</p>)}
-
-            <h3>Modo noturno</h3>
-            <button className="primary" onClick={()=>setDark(!dark)}>{dark?'Desativar modo noturno':'Ativar modo noturno'}</button>
-          </>}
+          <button className="danger" onClick={()=>{
+            if(confirm('Tem certeza que deseja apagar todos os dados?')){
+              localStorage.clear()
+              location.reload()
+            }
+          }}>
+            Apagar todos os dados
+          </button>
         </Card>
       }
 
       <nav>
         {[
-          ['inicio','▦'],
-          ['escala','▤'],
-          ['dados','◎'],
-          ['equipe','♙'],
-          ['bancadas','✤'],
-          ['config','⚙']
+          ['inicio','🏠'],
+          ['entradas','💵'],
+          ['gastos','💸'],
+          ['metas','🎯'],
+          ['relatorios','📊'],
+          ['config','⚙️']
         ].map(([id,icon])=>(
-          <button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>
+          <button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>
             <span>{icon}</span>{id}
           </button>
         ))}
@@ -291,38 +257,24 @@ function App(){
 }
 
 function Login({onLogin}){
-  const [login,setLogin]=useState('flavia.trindade')
-  const [senha,setSenha]=useState('')
+  const [senha,setSenha] = useState('')
 
   function entrar(){
-    const usuariosSalvos = carregar('petflow_pessoas',pessoasBase)
-    const usuarios = [
-      ...usuariosBase,
-      ...usuariosSalvos.map(p=>({
-        usuario:p.nome.toLowerCase().replaceAll(' ','.'),
-        senha:p.senha,
-        cargo:p.cargo || 'colaborador'
-      }))
-    ]
-
-    const user = usuarios.find(u=>u.usuario===login && u.senha===senha)
-
-    if(!user){
-      alert('Usuário ou senha incorretos')
+    if(senha !== '1234'){
+      alert('Senha incorreta')
       return
     }
-
-    onLogin(user)
+    onLogin()
   }
 
   return (
     <div className="login">
       <div className="loginCard">
-        <h1>🐾 PETFLOW</h1>
-        <p>Sistema online interno</p>
-        <input placeholder="Usuário" value={login} onChange={e=>setLogin(e.target.value)}/>
+        <h1>💰 ECONOMIA BAIXA</h1>
+        <p>Controle financeiro pessoal</p>
         <input placeholder="Senha" type="password" value={senha} onChange={e=>setSenha(e.target.value)}/>
         <button className="primary" onClick={entrar}>Entrar</button>
+        <small>Senha inicial: 1234</small>
       </div>
     </div>
   )
