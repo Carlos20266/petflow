@@ -261,7 +261,7 @@ function Login({onLogin}){
   const [senha,setSenha] = useState('')
 
   function entrar(){
-    if(senha !== '1234'){
+    if(senha !== '21012003'){
       alert('Senha incorreta')
       return
     }
@@ -275,7 +275,7 @@ function Login({onLogin}){
         <p>Controle financeiro pessoal</p>
         <input placeholder="Senha" type="password" value={senha} onChange={e=>setSenha(e.target.value)}/>
         <button className="primary" onClick={entrar}>Entrar</button>
-        <small>Senha inicial: 1234</small>
+        <small>seja bem vindo </small>
       </div>
     </div>
   )
